@@ -41,7 +41,7 @@ def train_net(cfg):
     params = {
         'batch_size': cfg.batch_size,
         'shuffle': True,
-        'num_workers': 4
+        'num_workers': 2
     }
     training_loader=data.DataLoader(training_set,**params)
     
