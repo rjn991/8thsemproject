@@ -130,6 +130,9 @@ def train_net(cfg):
                     if isinstance(m, Basenet):
                         filepath=cfg.result_path+'/stage%d_epoch%d_%.2f%%.pth'%(cfg.training_stage,epoch,test_info['activities_acc'])
                         m.savemodel(filepath)
+                        if epoch%10==0:
+                            filepath='/content/drive/MyDrive/models'+'/stage%d_epoch%d_%.2f%%.pth'%(cfg.training_stage,epoch,test_info['activities_acc'])
+                            m.savemodel(filepath)
 #                         print('model saved to:',filepath)
             else:
                 assert False
