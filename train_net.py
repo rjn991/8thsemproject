@@ -13,7 +13,7 @@ from dataset import *
 from gcn_model import *
 from base_model import *
 from utils import *
-
+from sklearn.metrics import accuracy_score,precision_score, recall_score, f1_score
 
 def set_bn_eval(m):
     classname = m.__class__.__name__
@@ -261,6 +261,12 @@ def train_collective(data_loader, model, device, optimizer, epoch, cfg):
     activities_meter=AverageMeter()
     loss_meter=AverageMeter()
     epoch_timer=Timer()
+
+    sk_accuracy_meter=AverageMeter()
+    sk_precision_meter=AverageMeter()
+    sk_recall_meter=AverageMeter()
+    sk_f1score_meter=AverageMeter()
+
     for batch_data in data_loader:
         model.train()
         model.apply(set_bn_eval)
@@ -313,6 +319,28 @@ def train_collective(data_loader, model, device, optimizer, epoch, cfg):
         actions_meter.update(actions_accuracy, actions_scores.shape[0])
         activities_meter.update(activities_accuracy, activities_scores.shape[0])
 
+        ######
+        # print(activities_in.tolist())
+        # print(activities_labels.tolist())
+        # print(activities_accuracy)
+
+
+        accuracy_activities=accuracy_score(activities_in.tolist(), activities_labels.tolist())
+        precision_activities = precision_score(activities_in.tolist(), activities_labels.tolist(), average='weighted',zero_division=1)
+        recall_activities = recall_score(activities_in.tolist(), activities_labels.tolist(), average='weighted',zero_division=1)
+        f1_activities = f1_score(activities_in.tolist(), activities_labels.tolist(), average='weighted')
+        
+        sk_accuracy_meter.update(accuracy_activities, activities_scores.shape[0])
+        sk_precision_meter.update(precision_activities, activities_scores.shape[0])
+        sk_recall_meter.update(recall_activities, activities_scores.shape[0])
+        sk_f1score_meter.update(f1_activities, activities_scores.shape[0])
+
+        # print(accuracy_activities)
+        # print(precision_activities)
+        # print(recall_activities)
+        # print(f1_activities)
+        # print("\n")
+        ######
         # Total loss
         total_loss=activities_loss+cfg.actions_loss_weight*actions_loss
         loss_meter.update(total_loss.item(), batch_size)
@@ -327,7 +355,12 @@ def train_collective(data_loader, model, device, optimizer, epoch, cfg):
         'epoch':epoch,
         'loss':loss_meter.avg,
         'activities_acc':activities_meter.avg*100,
-        'actions_acc':actions_meter.avg*100
+        'actions_acc':actions_meter.avg*100,
+        'sk_activities_accuracy':sk_accuracy_meter.avg*100,
+        'sk_activities_precision':sk_precision_meter.avg*100,
+        'sk_activities_recall':sk_recall_meter.avg*100,
+        'sk_activities_f1score':sk_f1score_meter.avg*100
+
     }
     
     return train_info
@@ -341,6 +374,12 @@ def test_collective(data_loader, model, device, epoch, cfg):
     loss_meter=AverageMeter()
     
     epoch_timer=Timer()
+
+    sk_accuracy_meter=AverageMeter()
+    sk_precision_meter=AverageMeter()
+    sk_recall_meter=AverageMeter()
+    sk_f1score_meter=AverageMeter()
+
     with torch.no_grad():
         for batch_data in data_loader:
             # prepare batch data
@@ -390,6 +429,27 @@ def test_collective(data_loader, model, device, epoch, cfg):
             actions_meter.update(actions_accuracy, actions_scores.shape[0])
             activities_meter.update(activities_accuracy, activities_scores.shape[0])
 
+            ######
+            # print(activities_in.tolist())
+            # print(activities_labels.tolist())
+            # print(activities_accuracy)
+            accuracy_activities=accuracy_score(activities_in.tolist(), activities_labels.tolist())
+            precision_activities = precision_score(activities_in.tolist(), activities_labels.tolist(), average='weighted',zero_division=1)
+            recall_activities = recall_score(activities_in.tolist(), activities_labels.tolist(), average='weighted',zero_division=1)
+            f1_activities = f1_score(activities_in.tolist(), activities_labels.tolist(), average='weighted')
+
+            sk_accuracy_meter.update(accuracy_activities, activities_scores.shape[0])
+            sk_precision_meter.update(precision_activities, activities_scores.shape[0])
+            sk_recall_meter.update(recall_activities, activities_scores.shape[0])
+            sk_f1score_meter.update(f1_activities, activities_scores.shape[0])
+            
+
+            # print(accuracy_activities)
+            # print(precision_activities)
+            # print(recall_activities)
+            # print(f1_activities)
+            # print("\n")
+            ######
             # Total loss
             total_loss=activities_loss+cfg.actions_loss_weight*actions_loss
             loss_meter.update(total_loss.item(), batch_size)
@@ -399,7 +459,11 @@ def test_collective(data_loader, model, device, epoch, cfg):
         'epoch':epoch,
         'loss':loss_meter.avg,
         'activities_acc':activities_meter.avg*100,
-        'actions_acc':actions_meter.avg*100
+        'actions_acc':actions_meter.avg*100,
+        'sk_activities_accuracy':sk_accuracy_meter.avg*100,
+        'sk_activities_precision':sk_precision_meter.avg*100,
+        'sk_activities_recall':sk_recall_meter.avg*100,
+        'sk_activities_f1score':sk_f1score_meter.avg*100
     }
     
     return test_info

@@ -92,8 +92,8 @@ def show_epoch_info(phase, log_path, info):
     else:
         print_log(log_path, '%s at epoch #%d'%(phase, info['epoch']))
         
-    print_log(log_path, 'Group Activity Accuracy: %.2f%%, Loss: %.5f, Using %.1f seconds'%(
-                info['activities_acc'], info['loss'], info['time']))
+    print_log(log_path, 'Group Activity Accuracy: %.2f%%, Loss: %.5f, Using %.1f seconds \nSklearn acc %.5f, prec %.5f, recall %.5f, f1s %.5f'%(
+                info['activities_acc'], info['loss'], info['time'], info['sk_activities_accuracy'], info['sk_activities_precision'], info['sk_activities_recall'], info['sk_activities_f1score']))
         
 def log_final_exp_result(log_path, data_path, exp_result):
     no_display_cfg=['num_workers', 'use_gpu', 'use_multi_gpu', 'device_list',
